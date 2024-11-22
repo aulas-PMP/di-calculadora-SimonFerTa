@@ -6,31 +6,29 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 public class Calculadora extends JFrame {
 
-    int ancho;
-    int alto;
+    private final int ancho;
+    private final int alto;
     
     public Calculadora() {
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         Dimension tamanoPantalla = Toolkit.getDefaultToolkit().getScreenSize();
-        alto = tamanoPantalla.height/2;
+        alto = 600;
         ancho = tamanoPantalla.width/2;
 
         setSize(ancho, alto);
-        setLocation(ancho, alto);
+        setLocationRelativeTo(null);
         setMinimumSize(new Dimension(ancho, alto));
-        setTitle("Calculadora");
+        setTitle("Calculadora - Simón Fernández Tacón");
 
         JPanel principal = new Principal();
         setContentPane(principal);
@@ -42,27 +40,30 @@ public class Calculadora extends JFrame {
         private String num2;
         private String operacion;
         private String result;
-        private JLabel resultado;
+        private final JLabel resultado;
+        private final JLabel introduciendo;
 
         Principal () {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-            JPanel pantalla = new JPanel();
-            pantalla.setAlignmentX(SwingConstants.RIGHT);
             resultado = new JLabel();
             resultado.setSize(ancho, alto/2);
             resultado.setMinimumSize(new Dimension(ancho, alto/2));
+            resultado.setPreferredSize(new Dimension(ancho, alto/4));
             resultado.setFont(new Font("Serif", Font.BOLD, 22));
-            resultado.setHorizontalAlignment(SwingConstants.RIGHT);
             resultado.setVisible(true);
-            pantalla.add(resultado);
+
+            introduciendo = new JLabel();
+            introduciendo.setFont(new Font("Serif", Font.ITALIC, 16));
+            introduciendo.setVisible(true);
 
             BotonesPantalla bp = new BotonesPantalla();
             Teclado tec = new Teclado();
 
-            this.add(pantalla);
-            this.add(bp);
-            this.addKeyListener(tec);
+            add(resultado);
+            add(introduciendo);
+            add(bp);
+            addKeyListener(tec);
         }
 
         private class BotonesPantalla extends JPanel implements ActionListener{
@@ -73,7 +74,14 @@ public class Calculadora extends JFrame {
                 operacion = "";
                 result = "";
 
-                setLayout(new GridLayout(5,4));
+                setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+                JPanel numericos = new JPanel();
+                JPanel operadores = new JPanel();
+
+                numericos.setLayout(new GridLayout(4,3));
+                operadores.setLayout(new GridLayout(4,2));
+
 
                 JButton btn0 = new JButton("0");
                 JButton btn1 = new JButton("1");
@@ -85,8 +93,8 @@ public class Calculadora extends JFrame {
                 JButton btn7 = new JButton("7");
                 JButton btn8 = new JButton("8");
                 JButton btn9 = new JButton("9");
+                
                 JButton btncoma = new JButton(",");
-
                 JButton btnsum = new JButton("+");
                 JButton btnres = new JButton("-");
                 JButton btnmult = new JButton("*");
@@ -95,53 +103,65 @@ public class Calculadora extends JFrame {
                 JButton btnerase = new JButton("<-");
                 JButton btnclear = new JButton("C");
 
-                btn0.addActionListener(this);
-                btn1.addActionListener(this);
-                btn2.addActionListener(this);
-                btn3.addActionListener(this);
-                btn4.addActionListener(this);
-                btn5.addActionListener(this);
-                btn6.addActionListener(this);
-                btn7.addActionListener(this);
-                btn8.addActionListener(this);
-                btn9.addActionListener(this);
-                btncoma.addActionListener(this);
-                btnsum.addActionListener(this);
-                btnres.addActionListener(this);
-                btnmult.addActionListener(this);
-                btndiv.addActionListener(this);
-                btncalc.addActionListener(this);
-                btnerase.addActionListener(this);
-                btnclear.addActionListener(this);
+                btn0.addActionListener(extracted());
+                btn1.addActionListener(extracted());
+                btn2.addActionListener(extracted());
+                btn3.addActionListener(extracted());
+                btn4.addActionListener(extracted());
+                btn5.addActionListener(extracted());
+                btn6.addActionListener(extracted());
+                btn7.addActionListener(extracted());
+                btn8.addActionListener(extracted());
+                btn9.addActionListener(extracted());
+                btncoma.addActionListener(extracted());
+                btnsum.addActionListener(extracted());
+                btnres.addActionListener(extracted());
+                btnmult.addActionListener(extracted());
+                btndiv.addActionListener(extracted());
+                btncalc.addActionListener(extracted());
+                btnerase.addActionListener(extracted());
+                btnclear.addActionListener(extracted());
 
-                this.add(new JLabel());
-                this.add(new JLabel());
-                this.add(btnerase);
-                this.add(btnclear);
-                this.add(btn7);
-                this.add(btn8);
-                this.add(btn9);
-                this.add(btnsum);
-                this.add(btn4);
-                this.add(btn5);
-                this.add(btn6);
-                this.add(btnres);
-                this.add(btn1);
-                this.add(btn2);
-                this.add(btn3);
-                this.add(btnmult);
-                this.add(btn0);
-                this.add(btncoma);
-                this.add(btncalc);
-                this.add(btndiv);
+                numericos.add(btn7);
+                numericos.add(btn8);
+                numericos.add(btn9);
+                numericos.add(btn4);
+                numericos.add(btn5);
+                numericos.add(btn6);
+                numericos.add(btn1);
+                numericos.add(btn2);
+                numericos.add(btn3);
+                numericos.add(new JLabel());
+                numericos.add(btn0);
+                numericos.add(new JLabel());
+
+                operadores.add(btnerase);
+                operadores.add(btnclear);
+                operadores.add(btnsum);
+                operadores.add(btnmult);
+                operadores.add(btnres);
+                operadores.add(btndiv);
+                operadores.add(btncoma);
+                operadores.add(btncalc);
+
+                numericos.setVisible(true);
+                operadores.setVisible(true);
+
+                add(numericos);
+                add(operadores);
             }
 
+            private Calculadora.Principal.BotonesPantalla extracted() {
+                return this;
+            }
+
+            //TODO Cambiar para mostrar resultado e introduciendo.
             @Override
             public void actionPerformed(ActionEvent e) {
                 String command = e.getActionCommand();
                 
                 switch (command) {
-                    case "0","1","2","3","4","5","6","7","8","9":
+                    case "0","1","2","3","4","5","6","7","8","9" -> {
                         if (operacion.isBlank()) {
                             num1 += command;
                             resultado.setText(num1);
@@ -149,9 +169,10 @@ public class Calculadora extends JFrame {
                             num2 += command;
                             resultado.setText(num2);
                         }
-                        break;
-                    case ",":
-                        if (operacion == "") {
+                    }
+                    case "," -> {
+                        
+                        if (operacion.isBlank()) {
                             if (num1.isBlank()) {
                                 num1 = "0.";
                             } else {
@@ -166,8 +187,8 @@ public class Calculadora extends JFrame {
                             }
                             resultado.setText(num2);
                         }
-                        break;
-                    case "+", "-", "*", "/":
+                    }
+                    case "+", "-", "*", "/" -> {
                         if (operacion.isBlank()) {
                             if (num1.isBlank()) {
                                 num1 = result;
@@ -176,19 +197,23 @@ public class Calculadora extends JFrame {
                         } else {
                             calcular();
                         }
-                        break;
-                    case "=":
+                    }
+                    case "=" -> {
                         if (!operacion.isBlank()) {
                             calcular();
                         } else {
-                            result = num1;
+                            if (!num1.isBlank()) {
+                                result = num1;
+                                resultado.setText(result);
+                                num1 = "";
+                            }
                         }
-                        break;
-                    case "C":
+                    }
+                    case "C" -> {
                         num1 = num2 = operacion = result = "";
                         resultado.setText(num1);
-                        break;
-                    case "<-":
+                    }
+                    case "<-" -> {
                         if (operacion.isBlank()) {
                             if (num1.length() > 0) {
                                 num1 = num1.substring(0, num1.length()-1);
@@ -200,16 +225,16 @@ public class Calculadora extends JFrame {
                                 resultado.setText(num2);
                             }
                         }
-                        break;
+                    }
                 }
             }
 
             private void calcular() {
                 double res;
 
-                if (num1.equals(""))
+                if (num1.isBlank())
                     num1 = "0";
-                if (num2.equals(""))
+                if (num2.isBlank())
                     num2 = "0";
 
                 if (operacion.equals("+"))
@@ -234,7 +259,6 @@ public class Calculadora extends JFrame {
                 num1 = num2 = operacion = "";
             }
         }
-
         private class Teclado extends KeyAdapter {
             
             @Override
