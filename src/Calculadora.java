@@ -58,12 +58,10 @@ public class Calculadora extends JFrame {
             introduciendo.setVisible(true);
 
             BotonesPantalla bp = new BotonesPantalla();
-            Teclado tec = new Teclado();
 
             add(resultado);
             add(introduciendo);
             add(bp);
-            addKeyListener(tec);
         }
 
         private class BotonesPantalla extends JPanel implements ActionListener{
@@ -75,13 +73,16 @@ public class Calculadora extends JFrame {
                 result = "";
 
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+                
+                addKeyListener(new Teclado());
+                setFocusable(true);
+                requestFocus();
 
                 JPanel numericos = new JPanel();
                 JPanel operadores = new JPanel();
 
                 numericos.setLayout(new GridLayout(4,3));
                 operadores.setLayout(new GridLayout(4,2));
-
 
                 JButton btn0 = new JButton("0");
                 JButton btn1 = new JButton("1");
@@ -155,19 +156,19 @@ public class Calculadora extends JFrame {
                 return this;
             }
 
-            //TODO Cambiar para mostrar resultado e introduciendo.
             @Override
             public void actionPerformed(ActionEvent e) {
+                this.requestFocus();
                 String command = e.getActionCommand();
                 
                 switch (command) {
                     case "0","1","2","3","4","5","6","7","8","9" -> {
                         if (operacion.isBlank()) {
                             num1 += command;
-                            resultado.setText(num1);
+                            introduciendo.setText(num1);
                         } else {
                             num2 += command;
-                            resultado.setText(num2);
+                            introduciendo.setText(introduciendo.getText() + command);
                         }
                     }
                     case "," -> {
@@ -178,28 +179,43 @@ public class Calculadora extends JFrame {
                             } else {
                                 num1 += ".";
                             }
-                            resultado.setText(num1);
+                            introduciendo.setText(introduciendo.getText() + command);
                         } else {
                             if (num2.isBlank()) {
                                 num2 = "0.";
                             } else {
                                 num2 += ".";
                             }
-                            resultado.setText(num2);
+                            introduciendo.setText(introduciendo.getText() + command);
                         }
                     }
                     case "+", "-", "*", "/" -> {
                         if (operacion.isBlank()) {
                             if (num1.isBlank()) {
                                 num1 = result;
+                                introduciendo.setText(num1);
                             }
                             operacion = command;
+                            introduciendo.setText(introduciendo.getText() + " " + command + " ");
                         } else {
-                            calcular();
+                            if (num2.isBlank()) {
+                                num2 = num1;
+                                introduciendo.setText(introduciendo.getText() + num2);
+                                calcular();
+                            } else {
+                                calcular();
+                                num1 = result;
+                                operacion = command;
+                                introduciendo.setText(result + " " + command + " ");
+                            }
                         }
                     }
                     case "=" -> {
                         if (!operacion.isBlank()) {
+                            if (num2.isBlank()) {
+                                num2 = num1;
+                                introduciendo.setText(introduciendo.getText() + num2);
+                            }
                             calcular();
                         } else {
                             if (!num1.isBlank()) {
@@ -212,17 +228,18 @@ public class Calculadora extends JFrame {
                     case "C" -> {
                         num1 = num2 = operacion = result = "";
                         resultado.setText(num1);
+                        introduciendo.setText(num1);
                     }
                     case "<-" -> {
                         if (operacion.isBlank()) {
                             if (num1.length() > 0) {
                                 num1 = num1.substring(0, num1.length()-1);
-                                resultado.setText(num1);
+                                introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
                             }
                         } else {
                             if (num2.length() > 0) {
                                 num2 = num2.substring(0, num2.length()-1);
-                                resultado.setText(num2);
+                                introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
                             }
                         }
                     }
@@ -265,6 +282,7 @@ public class Calculadora extends JFrame {
             public void keyTyped(KeyEvent e) {
                 int letter = e.getKeyChar();
                 System.out.print((char)letter);
+                //TODO toda la logica del teclado.
             }
         }
     }
