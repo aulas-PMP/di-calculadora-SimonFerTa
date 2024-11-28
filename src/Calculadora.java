@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -6,11 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
 
 public class Calculadora extends JFrame {
 
@@ -34,7 +37,7 @@ public class Calculadora extends JFrame {
         setContentPane(principal);
     }
 
-    private class Principal extends JPanel{
+    private class Principal extends JPanel {
 
         private String num1;
         private String num2;
@@ -45,16 +48,20 @@ public class Calculadora extends JFrame {
 
         Principal () {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setBackground(Color.DARK_GRAY);
 
             resultado = new JLabel();
-            resultado.setSize(ancho, alto/2);
-            resultado.setMinimumSize(new Dimension(ancho, alto/2));
-            resultado.setPreferredSize(new Dimension(ancho, alto/4));
             resultado.setFont(new Font("Serif", Font.BOLD, 22));
+            resultado.setForeground(Color.WHITE);
+            resultado.setMinimumSize(new Dimension(ancho, alto/6));
+            resultado.setPreferredSize(new Dimension(ancho, alto/6));
             resultado.setVisible(true);
 
             introduciendo = new JLabel();
             introduciendo.setFont(new Font("Serif", Font.ITALIC, 16));
+            introduciendo.setForeground(Color.WHITE);
+            introduciendo.setMinimumSize(new Dimension(ancho, alto/8));
+            introduciendo.setPreferredSize(new Dimension(ancho, alto/8));
             introduciendo.setVisible(true);
 
             BotonesPantalla bp = new BotonesPantalla();
@@ -73,16 +80,21 @@ public class Calculadora extends JFrame {
                 result = "";
 
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-                
+                setBackground(Color.DARK_GRAY);
+
                 addKeyListener(new Teclado());
                 setFocusable(true);
                 requestFocus();
 
                 JPanel numericos = new JPanel();
-                JPanel operadores = new JPanel();
-
+                numericos.setPreferredSize(new Dimension(ancho/3*2, alto));
                 numericos.setLayout(new GridLayout(4,3));
+                numericos.setBackground(Color.DARK_GRAY);
+
+                JPanel operadores = new JPanel();
+                operadores.setPreferredSize(new Dimension(ancho/4, alto));
                 operadores.setLayout(new GridLayout(4,2));
+                operadores.setBackground(Color.DARK_GRAY);
 
                 JButton btn0 = new JButton("0");
                 JButton btn1 = new JButton("1");
@@ -123,6 +135,25 @@ public class Calculadora extends JFrame {
                 btnerase.addActionListener(extracted());
                 btnclear.addActionListener(extracted());
 
+                btn0.setBackground(Color.LIGHT_GRAY);
+                btn1.setBackground(Color.LIGHT_GRAY);
+                btn2.setBackground(Color.LIGHT_GRAY);
+                btn3.setBackground(Color.LIGHT_GRAY);
+                btn4.setBackground(Color.LIGHT_GRAY);
+                btn5.setBackground(Color.LIGHT_GRAY);
+                btn6.setBackground(Color.LIGHT_GRAY);
+                btn7.setBackground(Color.LIGHT_GRAY);
+                btn8.setBackground(Color.LIGHT_GRAY);
+                btn9.setBackground(Color.LIGHT_GRAY);
+                btncoma.setBackground(Color.LIGHT_GRAY);
+                btnsum.setBackground(Color.LIGHT_GRAY);
+                btnres.setBackground(Color.LIGHT_GRAY);
+                btnmult.setBackground(Color.LIGHT_GRAY);
+                btndiv.setBackground(Color.LIGHT_GRAY);
+                btncalc.setBackground(Color.LIGHT_GRAY);
+                btnerase.setBackground(Color.LIGHT_GRAY);
+                btnclear.setBackground(Color.LIGHT_GRAY);
+
                 numericos.add(btn7);
                 numericos.add(btn8);
                 numericos.add(btn9);
@@ -148,7 +179,12 @@ public class Calculadora extends JFrame {
                 numericos.setVisible(true);
                 operadores.setVisible(true);
 
+                JPanel separator = new JPanel();
+                separator.setPreferredSize(new Dimension(ancho/12, alto));
+                separator.setBackground(Color.DARK_GRAY);
+
                 add(numericos);
+                add(separator);
                 add(operadores);
             }
 
@@ -165,7 +201,7 @@ public class Calculadora extends JFrame {
                     case "0","1","2","3","4","5","6","7","8","9" -> {
                         if (operacion.isBlank()) {
                             num1 += command;
-                            introduciendo.setText(num1);
+                            introduciendo.setText(num1.replace('.', ','));
                         } else {
                             num2 += command;
                             introduciendo.setText(introduciendo.getText() + command);
@@ -179,14 +215,16 @@ public class Calculadora extends JFrame {
                             } else {
                                 num1 += ".";
                             }
-                            introduciendo.setText(introduciendo.getText() + command);
+                            introduciendo.setText(num1.replace('.', ','));
                         } else {
                             if (num2.isBlank()) {
                                 num2 = "0.";
+                                introduciendo.setText(introduciendo.getText() + num2.replace('.', ','));
                             } else {
                                 num2 += ".";
+                                introduciendo.setText(introduciendo.getText() + ",");
                             }
-                            introduciendo.setText(introduciendo.getText() + command);
+                            
                         }
                     }
                     case "+", "-", "*", "/" -> {
@@ -246,44 +284,137 @@ public class Calculadora extends JFrame {
                 }
             }
 
+            private class Teclado extends KeyAdapter {
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    int command = e.getKeyCode();
+                    char letter = e.getKeyChar();
+
+                    switch (command) {
+                        case 96,97,98,99,100,101,102,103,104,105: //Numeros
+                            if (operacion.isBlank()) {
+                                num1 += letter;
+                                introduciendo.setText(num1.replace('.', ','));
+                            } else {
+                                num2 += letter;
+                                introduciendo.setText(introduciendo.getText() + letter);
+                            }
+                            break;
+                        case 110: //Coma
+                            if (operacion.isBlank()) {
+                                if (num1.isBlank()) {
+                                    num1 = "0.";
+                                } else {
+                                    num1 += ".";
+                                }
+                                introduciendo.setText(num1.replace('.', ','));
+                            } else {
+                                if (num2.isBlank()) {
+                                    num2 = "0.";
+                                    introduciendo.setText(introduciendo.getText() + num2.replace('.', ','));
+                                } else {
+                                    num2 += ".";
+                                    introduciendo.setText(introduciendo.getText() + ",");
+                                }
+                            }
+                            break;
+                        case 106,107,109,111: //Operadores 
+                            if (operacion.isBlank()) {
+                                if (num1.isBlank()) {
+                                    num1 = result;
+                                    introduciendo.setText(num1);
+                                }
+                                operacion = String.valueOf(letter);
+                                introduciendo.setText(introduciendo.getText() + " " + letter + " ");
+                            } else {
+                                if (num2.isBlank()) {
+                                    num2 = num1;
+                                    introduciendo.setText(introduciendo.getText() + num2);
+                                    calcular();
+                                } else {
+                                    calcular();
+                                    num1 = result;
+                                    operacion = String.valueOf(letter);
+                                    introduciendo.setText(result + " " + letter + " ");
+                                }
+                            }
+                            break;
+                        case 10: //Igual
+                            if (!operacion.isBlank()) {
+                                if (num2.isBlank()) {
+                                    num2 = num1;
+                                    introduciendo.setText(introduciendo.getText() + num2);
+                                }
+                                calcular();
+                            } else {
+                                if (!num1.isBlank()) {
+                                    result = num1;
+                                    resultado.setText(result);
+                                    num1 = "";
+                                }
+                            }
+                            break;
+                        case 127: //Clear
+                            num1 = num2 = operacion = result = "";
+                            resultado.setText(num1);
+                            introduciendo.setText(num1);
+                            break;
+                        case 8: //Borrado
+                            if (operacion.isBlank()) {
+                                if (num1.length() > 0) {
+                                    num1 = num1.substring(0, num1.length()-1);
+                                    introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
+                                }
+                            } else {
+                                if (num2.length() > 0) {
+                                    num2 = num2.substring(0, num2.length()-1);
+                                    introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
+                                }
+                            }
+                            break;
+                    }
+                    
+                }
+            }
+
             private void calcular() {
                 double res;
-
+    
                 if (num1.isBlank())
                     num1 = "0";
                 if (num2.isBlank())
                     num2 = "0";
-
+    
+                try {
                 if (operacion.equals("+"))
                     res = Double.parseDouble(num1) + Double.parseDouble(num2);
                 else if (operacion.equals("-"))
                     res = Double.parseDouble(num1) - Double.parseDouble(num2);
                 else if (operacion.equals ("*"))
                     res = Double.parseDouble(num1) * Double.parseDouble(num2);
-                else if (!num2.equals("0"))
+                else 
                     res = Double.parseDouble(num1) / Double.parseDouble(num2);
-                else
-                    res = 0;
-
+                
+                if (res == Double.POSITIVE_INFINITY || res == Double.NEGATIVE_INFINITY)
+                    throw new ArithmeticException();
+    
                 if ((double)((int)res) == res)
-                    result = Integer.toString((int)res);
+                    result = String.valueOf((int)res);
                 else
-                    result = Double.toString(res);
+                    result = String.valueOf(res);
                 
                 resultado.setText(result);
                 System.out.println(num1 + " " + operacion + " " + num2 + " = " + result);
-
-                num1 = num2 = operacion = "";
+                } catch (ArithmeticException | NumberFormatException e) {
+                    resultado.setText("Err.");
+                    introduciendo.setText("");
+                } finally {
+                    num1 = num2 = operacion = "";
+                }
             }
         }
-        private class Teclado extends KeyAdapter {
-            
-            @Override
-            public void keyTyped(KeyEvent e) {
-                int letter = e.getKeyChar();
-                System.out.print((char)letter);
-                //TODO toda la logica del teclado.
-            }
-        }
+        
+        
     }
 }
