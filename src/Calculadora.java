@@ -13,15 +13,36 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 public class Calculadora extends JFrame {
 
-    private final int ancho;
-    private final int alto;
+    private int ancho;
+    private int alto;
+    private int mode = MODE.FREE_MODE; //El modo de input (0 = mouse only, 1 = keyboard only, 2 = free mode)
+
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
+
+    // -TODOLIST-
+    //TODO Mantener proporciones al maximizar la pantalla.
+    //TODO Implementar cambios de modo.
+    //TODO Borrar todos los datos al minimizar la ventana.
     
     public Calculadora() {
+        this.mode = MODE.FREE_MODE;
+        init();
+    }
 
+    public Calculadora(int mode) { 
+        this.mode = mode;
+        init();
+    }
+
+    private void init() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         Dimension tamanoPantalla = Toolkit.getDefaultToolkit().getScreenSize();
@@ -43,12 +64,20 @@ public class Calculadora extends JFrame {
         private String num2;
         private String operacion;
         private String result;
-        private final JLabel resultado;
-        private final JLabel introduciendo;
+        private JLabel resultado;
+        private JLabel introduciendo;
 
-        Principal () {
+        public Principal() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setBackground(Color.DARK_GRAY);
+
+            JPanel modeLine = new JPanel();
+            JLabel actualMode = new JLabel();
+            modeLine.setBackground(Color.DARK_GRAY);
+            actualMode.setFont(new Font("Serif", Font.ITALIC, 12));
+            actualMode.setText("Modo actual: " + MODE.stringValue(mode));
+            actualMode.setForeground(Color.WHITE);
+            modeLine.add(actualMode);
 
             resultado = new JLabel();
             resultado.setFont(new Font("Serif", Font.BOLD, 22));
@@ -65,8 +94,13 @@ public class Calculadora extends JFrame {
             introduciendo.setVisible(true);
 
             BotonesPantalla bp = new BotonesPantalla();
+            JSeparator sp = new JSeparator(SwingConstants.HORIZONTAL);
+            sp.setBackground(Color.WHITE);
+            sp.setForeground(Color.WHITE);
 
+            add(modeLine);
             add(resultado);
+            add(sp);
             add(introduciendo);
             add(bp);
         }
@@ -81,7 +115,6 @@ public class Calculadora extends JFrame {
 
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
                 setBackground(Color.DARK_GRAY);
-
                 addKeyListener(new Teclado());
                 setFocusable(true);
                 requestFocus();
@@ -95,6 +128,8 @@ public class Calculadora extends JFrame {
                 operadores.setPreferredSize(new Dimension(ancho/4, alto));
                 operadores.setLayout(new GridLayout(4,2));
                 operadores.setBackground(Color.DARK_GRAY);
+
+                //TODO NewButton btnX = new NewButton(); - Dentro de NewButton: addActionListener(this) y el metodo acrionPerformed
 
                 JButton btn0 = new JButton("0");
                 JButton btn1 = new JButton("1");
@@ -186,100 +221,38 @@ public class Calculadora extends JFrame {
                 add(numericos);
                 add(separator);
                 add(operadores);
+
             }
 
-            private Calculadora.Principal.BotonesPantalla extracted() {
-                return this;
+            private class NewButton implements ActionListener {
+                
             }
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 this.requestFocus();
-                String command = e.getActionCommand();
-                
-                switch (command) {
-                    case "0","1","2","3","4","5","6","7","8","9" -> {
-                        if (operacion.isBlank()) {
-                            num1 += command;
-                            introduciendo.setText(num1.replace('.', ','));
-                        } else {
-                            num2 += command;
-                            introduciendo.setText(introduciendo.getText() + command);
-                        }
-                    }
-                    case "," -> {
-                        
-                        if (operacion.isBlank()) {
-                            if (num1.isBlank()) {
-                                num1 = "0.";
-                            } else {
-                                num1 += ".";
-                            }
-                            introduciendo.setText(num1.replace('.', ','));
-                        } else {
-                            if (num2.isBlank()) {
-                                num2 = "0.";
-                                introduciendo.setText(introduciendo.getText() + num2.replace('.', ','));
-                            } else {
-                                num2 += ".";
-                                introduciendo.setText(introduciendo.getText() + ",");
-                            }
-                            
-                        }
-                    }
-                    case "+", "-", "*", "/" -> {
-                        if (operacion.isBlank()) {
-                            if (num1.isBlank()) {
-                                num1 = result;
-                                introduciendo.setText(num1);
-                            }
-                            operacion = command;
-                            introduciendo.setText(introduciendo.getText() + " " + command + " ");
-                        } else {
-                            if (num2.isBlank()) {
-                                num2 = num1;
-                                introduciendo.setText(introduciendo.getText() + num2);
-                                calcular();
-                            } else {
-                                calcular();
-                                num1 = result;
-                                operacion = command;
-                                introduciendo.setText(result + " " + command + " ");
-                            }
-                        }
-                    }
-                    case "=" -> {
-                        if (!operacion.isBlank()) {
-                            if (num2.isBlank()) {
-                                num2 = num1;
-                                introduciendo.setText(introduciendo.getText() + num2);
-                            }
-                            calcular();
-                        } else {
-                            if (!num1.isBlank()) {
-                                result = num1;
-                                resultado.setText(result);
-                                num1 = "";
-                            }
-                        }
-                    }
-                    case "C" -> {
-                        num1 = num2 = operacion = result = "";
-                        resultado.setText(num1);
-                        introduciendo.setText(num1);
-                    }
-                    case "<-" -> {
-                        if (operacion.isBlank()) {
-                            if (num1.length() > 0) {
-                                num1 = num1.substring(0, num1.length()-1);
-                                introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
-                            }
-                        } else {
-                            if (num2.length() > 0) {
-                                num2 = num2.substring(0, num2.length()-1);
-                                introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
-                            }
-                        }
+                if (mode != 1) {
+                    String command = e.getActionCommand();
+                    
+                    switch (command) {
+                        case "0","1","2","3","4","5","6","7","8","9":
+                            addNumber(command);
+                            break;
+                        case ",":
+                            addComma();
+                            break;
+                        case "+", "-", "*", "/":
+                            addCommand(command);
+                            break;
+                        case "=":
+                            calculate();
+                            break;
+                        case "C":
+                            clear();
+                            break;
+                        case "<-":
+                            erase();
+                            break;
                     }
                 }
             }
@@ -288,93 +261,119 @@ public class Calculadora extends JFrame {
 
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    int command = e.getKeyCode();
-                    char letter = e.getKeyChar();
+                    if (mode != 0) {
+                        int command = e.getKeyCode();
+                        String valor = String.valueOf(e.getKeyChar());
 
-                    switch (command) {
-                        case 96,97,98,99,100,101,102,103,104,105: //Numeros
-                            if (operacion.isBlank()) {
-                                num1 += letter;
-                                introduciendo.setText(num1.replace('.', ','));
-                            } else {
-                                num2 += letter;
-                                introduciendo.setText(introduciendo.getText() + letter);
-                            }
-                            break;
-                        case 110: //Coma
-                            if (operacion.isBlank()) {
-                                if (num1.isBlank()) {
-                                    num1 = "0.";
-                                } else {
-                                    num1 += ".";
-                                }
-                                introduciendo.setText(num1.replace('.', ','));
-                            } else {
-                                if (num2.isBlank()) {
-                                    num2 = "0.";
-                                    introduciendo.setText(introduciendo.getText() + num2.replace('.', ','));
-                                } else {
-                                    num2 += ".";
-                                    introduciendo.setText(introduciendo.getText() + ",");
-                                }
-                            }
-                            break;
-                        case 106,107,109,111: //Operadores 
-                            if (operacion.isBlank()) {
-                                if (num1.isBlank()) {
-                                    num1 = result;
-                                    introduciendo.setText(num1);
-                                }
-                                operacion = String.valueOf(letter);
-                                introduciendo.setText(introduciendo.getText() + " " + letter + " ");
-                            } else {
-                                if (num2.isBlank()) {
-                                    num2 = num1;
-                                    introduciendo.setText(introduciendo.getText() + num2);
-                                    calcular();
-                                } else {
-                                    calcular();
-                                    num1 = result;
-                                    operacion = String.valueOf(letter);
-                                    introduciendo.setText(result + " " + letter + " ");
-                                }
-                            }
-                            break;
-                        case 10: //Igual
-                            if (!operacion.isBlank()) {
-                                if (num2.isBlank()) {
-                                    num2 = num1;
-                                    introduciendo.setText(introduciendo.getText() + num2);
-                                }
-                                calcular();
-                            } else {
-                                if (!num1.isBlank()) {
-                                    result = num1;
-                                    resultado.setText(result);
-                                    num1 = "";
-                                }
-                            }
-                            break;
-                        case 127: //Clear
-                            num1 = num2 = operacion = result = "";
-                            resultado.setText(num1);
-                            introduciendo.setText(num1);
-                            break;
-                        case 8: //Borrado
-                            if (operacion.isBlank()) {
-                                if (num1.length() > 0) {
-                                    num1 = num1.substring(0, num1.length()-1);
-                                    introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
-                                }
-                            } else {
-                                if (num2.length() > 0) {
-                                    num2 = num2.substring(0, num2.length()-1);
-                                    introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
-                                }
-                            }
-                            break;
+                        switch (command) {
+                            case 96,97,98,99,100,101,102,103,104,105: //Numeros
+                                addNumber(valor);
+                                break;
+                            case 110: //Coma
+                                addComma();
+                                break;
+                            case 106,107,109,111: //Operadores 
+                                addCommand(valor);
+                                break;
+                            case 10: //Igual
+                                calculate();
+                                break;
+                            case 127: //Clear
+                                clear();
+                                break;
+                            case 8: //Borrado
+                                erase();
+                                break;
+                        }
+                    }   
+                }
+            }
+
+            private void addNumber(String num) {
+                if (operacion.isBlank()) {
+                    num1 += num;
+                    introduciendo.setText(num1.replace('.', ','));
+                } else {
+                    num2 += num;
+                    introduciendo.setText(introduciendo.getText() + num);
+                }
+            }
+
+            private void addComma() {
+                if (operacion.isBlank()) {
+                    if (num1.isBlank()) {
+                        num1 = "0.";
+                    } else {
+                        num1 += ".";
+                    }
+                    introduciendo.setText(num1.replace('.', ','));
+                } else {
+                    if (num2.isBlank()) {
+                        num2 = "0.";
+                        introduciendo.setText(introduciendo.getText() + num2.replace('.', ','));
+                    } else {
+                        num2 += ".";
+                        introduciendo.setText(introduciendo.getText() + ",");
                     }
                     
+                }
+            }
+
+            private void addCommand(String command) {
+                if (operacion.isBlank()) {
+                    if (num1.isBlank()) {
+                        num1 = result;
+                        introduciendo.setText(num1);
+                    }
+                    operacion = command;
+                    introduciendo.setText(introduciendo.getText() + " " + command + " ");
+                } else {
+                    if (num2.isBlank()) {
+                        num2 = num1;
+                        introduciendo.setText(introduciendo.getText() + num2);
+                        calcular();
+                    } else {
+                        calcular();
+                        num1 = result;
+                        operacion = command;
+                        introduciendo.setText(result + " " + command + " ");
+                    }
+                }
+            }
+
+            private void clear() {
+                num1 = num2 = operacion = result = "";
+                        resultado.setText(num1);
+                        introduciendo.setText(num1);
+            }
+
+            private void calculate() {
+                if (!operacion.isBlank()) {
+                    if (num2.isBlank()) {
+                        num2 = num1;
+                        introduciendo.setText(introduciendo.getText() + num2);
+                    }
+                    calcular();
+                } else {
+                    if (!num1.isBlank()) {
+                        result = num1;
+                        resultado.setText(result);
+                        num1 = "";
+                    }
+                }
+            }
+
+            private void erase() {
+                if (operacion.isBlank()) {
+                    if (num1.length() > 0) {
+                        num1 = num1.substring(0, num1.length()-1);
+                        introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
+                    }
+                } else {
+                    if (num2.length() > 0) {
+                        num2 = num2.substring(0, num2.length()-1);
+                        introduciendo.setText(introduciendo.getText().substring(0, introduciendo.getText().length()-1));
+                    }
                 }
             }
 
@@ -414,7 +413,20 @@ public class Calculadora extends JFrame {
                 }
             }
         }
-        
-        
+    }
+}
+
+class MODE {
+    public static final int MOUSE_ONLY = 0;
+    public static final int KEYBOARD_ONLY = 1;
+    public static final int FREE_MODE = 2;
+
+    public static final String stringValue(int value) {
+        switch (value) {
+            case 0: return "MOUSE_ONLY";
+            case 1: return "KEYBOARD_ONLY";
+            case 2: return "FREE_MODE";
+            default: return null;
+        }
     }
 }
