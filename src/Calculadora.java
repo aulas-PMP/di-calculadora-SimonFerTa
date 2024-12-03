@@ -5,8 +5,12 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -15,22 +19,26 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
-import javax.swing.border.LineBorder;
 
-public class Calculadora extends JFrame {
+public class Calculadora extends JFrame implements WindowListener, ComponentListener {
 
     private int ancho;
     private int alto;
     private int mode = MODE.FREE_MODE; //El modo de input (0 = mouse only, 1 = keyboard only, 2 = free mode)
+
+    private String num1;
+    private String num2;
+    private String operacion;
+    private String result;
+    private JLabel resultado;
+    private JLabel introduciendo;
 
     public void setMode(int mode) {
         this.mode = mode;
     }
 
     // -TODOLIST-
-    //TODO Mantener proporciones al maximizar la pantalla.
     //TODO Implementar cambios de modo.
-    //TODO Borrar todos los datos al minimizar la ventana.
     
     public Calculadora() {
         this.mode = MODE.FREE_MODE;
@@ -56,16 +64,12 @@ public class Calculadora extends JFrame {
 
         JPanel principal = new Principal();
         setContentPane(principal);
+
+        addWindowListener(this);
+        addComponentListener(this);
     }
 
     private class Principal extends JPanel {
-
-        private String num1;
-        private String num2;
-        private String operacion;
-        private String result;
-        private JLabel resultado;
-        private JLabel introduciendo;
 
         public Principal() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -129,65 +133,25 @@ public class Calculadora extends JFrame {
                 operadores.setLayout(new GridLayout(4,2));
                 operadores.setBackground(Color.DARK_GRAY);
 
-                //TODO NewButton btnX = new NewButton(); - Dentro de NewButton: addActionListener(this) y el metodo acrionPerformed
-
-                JButton btn0 = new JButton("0");
-                JButton btn1 = new JButton("1");
-                JButton btn2 = new JButton("2");
-                JButton btn3 = new JButton("3");
-                JButton btn4 = new JButton("4");
-                JButton btn5 = new JButton("5");
-                JButton btn6 = new JButton("6");
-                JButton btn7 = new JButton("7");
-                JButton btn8 = new JButton("8");
-                JButton btn9 = new JButton("9");
+                JButton btn0 = createButton("0");
+                JButton btn1 = createButton("1");
+                JButton btn2 = createButton("2");
+                JButton btn3 = createButton("3");
+                JButton btn4 = createButton("4");
+                JButton btn5 = createButton("5");
+                JButton btn6 = createButton("6");
+                JButton btn7 = createButton("7");
+                JButton btn8 = createButton("8");
+                JButton btn9 = createButton("9");
                 
-                JButton btncoma = new JButton(",");
-                JButton btnsum = new JButton("+");
-                JButton btnres = new JButton("-");
-                JButton btnmult = new JButton("*");
-                JButton btndiv = new JButton("/");
-                JButton btncalc = new JButton("=");
-                JButton btnerase = new JButton("<-");
-                JButton btnclear = new JButton("C");
-
-                btn0.addActionListener(extracted());
-                btn1.addActionListener(extracted());
-                btn2.addActionListener(extracted());
-                btn3.addActionListener(extracted());
-                btn4.addActionListener(extracted());
-                btn5.addActionListener(extracted());
-                btn6.addActionListener(extracted());
-                btn7.addActionListener(extracted());
-                btn8.addActionListener(extracted());
-                btn9.addActionListener(extracted());
-                btncoma.addActionListener(extracted());
-                btnsum.addActionListener(extracted());
-                btnres.addActionListener(extracted());
-                btnmult.addActionListener(extracted());
-                btndiv.addActionListener(extracted());
-                btncalc.addActionListener(extracted());
-                btnerase.addActionListener(extracted());
-                btnclear.addActionListener(extracted());
-
-                btn0.setBackground(Color.LIGHT_GRAY);
-                btn1.setBackground(Color.LIGHT_GRAY);
-                btn2.setBackground(Color.LIGHT_GRAY);
-                btn3.setBackground(Color.LIGHT_GRAY);
-                btn4.setBackground(Color.LIGHT_GRAY);
-                btn5.setBackground(Color.LIGHT_GRAY);
-                btn6.setBackground(Color.LIGHT_GRAY);
-                btn7.setBackground(Color.LIGHT_GRAY);
-                btn8.setBackground(Color.LIGHT_GRAY);
-                btn9.setBackground(Color.LIGHT_GRAY);
-                btncoma.setBackground(Color.LIGHT_GRAY);
-                btnsum.setBackground(Color.LIGHT_GRAY);
-                btnres.setBackground(Color.LIGHT_GRAY);
-                btnmult.setBackground(Color.LIGHT_GRAY);
-                btndiv.setBackground(Color.LIGHT_GRAY);
-                btncalc.setBackground(Color.LIGHT_GRAY);
-                btnerase.setBackground(Color.LIGHT_GRAY);
-                btnclear.setBackground(Color.LIGHT_GRAY);
+                JButton btncoma = createButton(",");
+                JButton btnsum = createButton("+");
+                JButton btnres = createButton("-");
+                JButton btnmult = createButton("*");
+                JButton btndiv = createButton("/");
+                JButton btncalc = createButton("=");
+                JButton btnerase = createButton("<-");
+                JButton btnclear = createButton("C");
 
                 numericos.add(btn7);
                 numericos.add(btn8);
@@ -224,13 +188,18 @@ public class Calculadora extends JFrame {
 
             }
 
-            private class NewButton implements ActionListener {
+            private JButton createButton(String command) {
+
+                JButton newButton = new JButton(command);
+                newButton.setFocusable(false);
+                newButton.addActionListener(this);
+                newButton.setBackground(Color.LIGHT_GRAY);
+                return newButton;
                 
             }
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                this.requestFocus();
                 if (mode != 1) {
                     String command = e.getActionCommand();
                     
@@ -269,7 +238,7 @@ public class Calculadora extends JFrame {
                             case 96,97,98,99,100,101,102,103,104,105: //Numeros
                                 addNumber(valor);
                                 break;
-                            case 110: //Coma
+                            case 46,44,110: //Coma
                                 addComma();
                                 break;
                             case 106,107,109,111: //Operadores 
@@ -329,9 +298,14 @@ public class Calculadora extends JFrame {
                     introduciendo.setText(introduciendo.getText() + " " + command + " ");
                 } else {
                     if (num2.isBlank()) {
-                        num2 = num1;
-                        introduciendo.setText(introduciendo.getText() + num2);
-                        calcular();
+                        if (command.equals(operacion)) {
+                            num2 = num1;
+                            introduciendo.setText(introduciendo.getText() + num2);
+                            calcular();
+                        } else {
+                            operacion = command;
+                            introduciendo.setText(introduciendo.getText().substring(0,introduciendo.getText().length()-2) + operacion + " ");
+                        }
                     } else {
                         calcular();
                         num1 = result;
@@ -356,9 +330,16 @@ public class Calculadora extends JFrame {
                     calcular();
                 } else {
                     if (!num1.isBlank()) {
-                        result = num1;
-                        resultado.setText(result);
-                        num1 = "";
+                        try {
+                            Double.parseDouble(result);
+                            result = num1;
+                            resultado.setText(result);
+                            num1 = "";
+                        } catch (NumberFormatException e) {
+                            resultado.setText("Err.");
+                            introduciendo.setText("");
+                            num1 = num2 = result = operacion = "";
+                        }
                     }
                 }
             }
@@ -386,25 +367,31 @@ public class Calculadora extends JFrame {
                     num2 = "0";
     
                 try {
-                if (operacion.equals("+"))
-                    res = Double.parseDouble(num1) + Double.parseDouble(num2);
-                else if (operacion.equals("-"))
-                    res = Double.parseDouble(num1) - Double.parseDouble(num2);
-                else if (operacion.equals ("*"))
-                    res = Double.parseDouble(num1) * Double.parseDouble(num2);
-                else 
-                    res = Double.parseDouble(num1) / Double.parseDouble(num2);
-                
-                if (res == Double.POSITIVE_INFINITY || res == Double.NEGATIVE_INFINITY)
-                    throw new ArithmeticException();
-    
-                if ((double)((int)res) == res)
-                    result = String.valueOf((int)res);
-                else
-                    result = String.valueOf(res);
-                
-                resultado.setText(result);
-                System.out.println(num1 + " " + operacion + " " + num2 + " = " + result);
+                    if (operacion.equals("+"))
+                        res = Double.parseDouble(num1) + Double.parseDouble(num2);
+                    else if (operacion.equals("-"))
+                        res = Double.parseDouble(num1) - Double.parseDouble(num2);
+                    else if (operacion.equals ("*"))
+                        res = Double.parseDouble(num1) * Double.parseDouble(num2);
+                    else 
+                        res = Double.parseDouble(num1) / Double.parseDouble(num2);
+                    
+                    if (res == Double.POSITIVE_INFINITY || res == Double.NEGATIVE_INFINITY)
+                        throw new ArithmeticException();
+
+                    if (res < 0) {
+                        resultado.setForeground(Color.RED);
+                    } else {
+                        resultado.setForeground(Color.WHITE);
+                    }
+        
+                    if ((double)((int)res) == res)
+                        result = String.valueOf((int)res);
+                    else
+                        result = String.valueOf(res);
+                    
+                    resultado.setText(result.replace(".", ","));
+                    System.out.println(num1 + " " + operacion + " " + num2 + " = " + result);
                 } catch (ArithmeticException | NumberFormatException e) {
                     resultado.setText("Err.");
                     introduciendo.setText("");
@@ -414,6 +401,49 @@ public class Calculadora extends JFrame {
             }
         }
     }
+
+    // WindowListener
+    @Override
+    public void windowActivated(WindowEvent e) {}
+
+    @Override
+    public void windowClosed(WindowEvent e) {}
+
+    @Override
+    public void windowClosing(WindowEvent e) {}
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {}
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {}
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+        num1 = num2 = operacion = result = "";
+        resultado.setText("");
+        introduciendo.setText("");
+    }
+
+    // ComponentListener
+    @Override
+    public void windowOpened(WindowEvent e) {}
+
+    @Override
+    public void componentHidden(ComponentEvent e) {}
+
+    @Override
+    public void componentMoved(ComponentEvent e) {
+        setLocationRelativeTo(null);
+    }
+
+    @Override
+    public void componentResized(ComponentEvent e) {}
+
+    @Override
+    public void componentShown(ComponentEvent e) {}
+
+    
 }
 
 class MODE {
