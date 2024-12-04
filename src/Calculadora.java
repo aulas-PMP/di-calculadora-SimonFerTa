@@ -1,6 +1,8 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -36,9 +38,6 @@ public class Calculadora extends JFrame implements WindowListener, ComponentList
     public void setMode(int mode) {
         this.mode = mode;
     }
-
-    // -TODOLIST-
-    //TODO Implementar cambios de modo.
     
     public Calculadora() {
         this.mode = MODE.FREE_MODE;
@@ -75,13 +74,18 @@ public class Calculadora extends JFrame implements WindowListener, ComponentList
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setBackground(Color.DARK_GRAY);
 
-            JPanel modeLine = new JPanel();
-            JLabel actualMode = new JLabel();
+            class ModeLine extends JPanel {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    setFont(new Font("Serif", Font.ITALIC, 14));
+                    setForeground(Color.WHITE);
+                    setAlignmentX(SwingConstants.CENTER);
+                    g.drawString("Modo actual: " + MODE.stringValue(mode), 0, this.getSize().height);
+                }
+            }
+            JPanel modeLine = new ModeLine();
             modeLine.setBackground(Color.DARK_GRAY);
-            actualMode.setFont(new Font("Serif", Font.ITALIC, 12));
-            actualMode.setText("Modo actual: " + MODE.stringValue(mode));
-            actualMode.setForeground(Color.WHITE);
-            modeLine.add(actualMode);
 
             resultado = new JLabel();
             resultado.setFont(new Font("Serif", Font.BOLD, 22));
@@ -438,7 +442,11 @@ public class Calculadora extends JFrame implements WindowListener, ComponentList
     }
 
     @Override
-    public void componentResized(ComponentEvent e) {}
+    public void componentResized(ComponentEvent e) {
+        if (getExtendedState() != Frame.MAXIMIZED_BOTH) {
+            setSize(ancho, alto);
+        }
+    }
 
     @Override
     public void componentShown(ComponentEvent e) {}
