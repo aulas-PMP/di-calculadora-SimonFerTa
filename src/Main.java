@@ -1,3 +1,4 @@
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Main {
@@ -5,17 +6,20 @@ public class Main {
 
         Scanner sc = new Scanner(System.in);
 
-        System.out.print(
+        System.out.println(
             "Elige el modo para abrir la calculadora:\n" +
             "1.- Sólo ratón.\n" +
             "2.- Sólo teclado\n" +
-            "3.- Modo libre (ambos)\n" +
-            "Opción: "
+            "3.- Modo libre (ambos)"
         );
-        int opcion = sc.nextInt()-1;
+        int opcion = -1;
         while (opcion < 0 || opcion > 2) {
             System.out.print("Opción: ");
-            opcion = sc.nextInt()-1;
+            try {
+                opcion = sc.nextInt()-1;
+            } catch (NoSuchElementException | IllegalStateException e) {
+                sc.next();
+            }
         }
         sc.close();
 
