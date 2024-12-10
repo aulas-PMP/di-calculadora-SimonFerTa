@@ -296,7 +296,7 @@ public class Calculadora extends JFrame implements WindowListener, ComponentList
                 if (operacion.isBlank()) {
                     if (num1.isBlank()) {
                         num1 = result;
-                        introduciendo.setText(num1);
+                        introduciendo.setText(num1.replace('.', ','));
                     }
                     operacion = command;
                     introduciendo.setText(introduciendo.getText() + " " + command + " ");
