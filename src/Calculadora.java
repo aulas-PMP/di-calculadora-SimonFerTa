@@ -335,7 +335,7 @@ public class Calculadora extends JFrame implements WindowListener, ComponentList
                 } else {
                     if (!num1.isBlank()) {
                         try {
-                            Double.parseDouble(result);
+                            Double.parseDouble(num1);
                             result = num1;
                             resultado.setText(result);
                             num1 = "";
